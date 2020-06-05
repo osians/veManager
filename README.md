@@ -1,2 +1,2 @@
 # veManager
-Virtual Entity Mananger
+Virtual Entity Data Manager
