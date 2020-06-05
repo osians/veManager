@@ -9,22 +9,23 @@ require_once __DIR__ . '/../src/QueryBuilder.php';
 require_once __DIR__ . '/../src/Database/Provider/ProviderInterface.php';
 require_once __DIR__ . '/../src/Database/Provider/Mysql.php';
 
-use \Osians\DataEntityManager\QueryBuilderInterface;
-use \Osians\DataEntityManager\QueryBuilder;
-use \Osians\DataEntityManager\Database\Provider\Mysql;
-use \Osians\DataEntityManager\EntityInterface;
-use \Osians\DataEntityManager\Entity;
-use \Osians\DataEntityManager\VirtualEntity;
-use \Osians\DataEntityManager\VeManager;
+
+use Wsantana\VeManager\QueryBuilderInterface;
+use Wsantana\VeManager\QueryBuilder;
+use Wsantana\VeManager\Database\Provider\Mysql;
+use Wsantana\VeManager\EntityInterface;
+use Wsantana\VeManager\Entity;
+use Wsantana\VeManager\VirtualEntity;
+use Wsantana\VeManager\VeManager;
 
 
 $drive = new Mysql();
 $drive
-	->setHostname('localhost')
-	->setPort('3306')
-	->setUsername('wsantana')
-	->setPassword('123456')
-	->setDatabaseName('vita');
+    ->setHostname('localhost')
+    ->setPort('3306')
+    ->setUsername('wsantana')
+    ->setPassword('123456')
+    ->setDatabaseName('vita');
 
 $pdo = $drive->conectar();
 
