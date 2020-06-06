@@ -10,13 +10,13 @@ require_once __DIR__ . '/../src/Database/Provider/ProviderInterface.php';
 require_once __DIR__ . '/../src/Database/Provider/Mysql.php';
 
 
-use Wsantana\VeManager\QueryBuilderInterface;
-use Wsantana\VeManager\QueryBuilder;
-use Wsantana\VeManager\Database\Provider\Mysql;
-use Wsantana\VeManager\EntityInterface;
-use Wsantana\VeManager\Entity;
-use Wsantana\VeManager\VirtualEntity;
-use Wsantana\VeManager\VeManager;
+use Osians\VeManager\QueryBuilderInterface;
+use Osians\VeManager\QueryBuilder;
+use Osians\VeManager\Database\Provider\Mysql;
+use Osians\VeManager\EntityInterface;
+use Osians\VeManager\Entity;
+use Osians\VeManager\VirtualEntity;
+use Osians\VeManager\VeManager;
 
 
 $drive = new Mysql();

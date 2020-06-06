@@ -1,6 +1,6 @@
 <?php
 
-namespace Wsantana\VeManager\Database\Provider;
+namespace Osians\VeManager\Database\Provider;
 
 interface ProviderInterface
 {

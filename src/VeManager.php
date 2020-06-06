@@ -1,8 +1,8 @@
 <?php
 
-namespace Wsantana\VeManager;
+namespace Osians\VeManager;
 
-use \Wsantana\VeManager\VirtualEntity;
+use \Osians\VeManager\VirtualEntity;
 
 
 /**

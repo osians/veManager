@@ -1,14 +1,47 @@
 <?php
 
+require __DIR__ . '/../vendor/autoload.php';
+
+use PHPUnit\Framework\TestCase;
+
+class QueryBuilderTest extends TestCase
+{
+    protected $_vem = null;
+    
+    public function setUp()
+    {
+        # Conexao...
+        $provider = new \Osians\VeManager\Database\Provider\Mysql();
+        $provider
+            ->setHostname('localhost')
+            ->setPort('3306')
+            ->setUsername('wsantana')
+            ->setPassword('123456')
+            ->setDatabaseName('datamanager');
+        
+        $connection = $provider->conectar();
+        $this->_vem = new VeManager($connection);
+    }
+    
+    public function testUserQuery()
+    {
+        $query = new QueryBuilder();
+        $query->select()->from('user')->where('id_user = ?', 4);
+        $result = $this->_vem->query($query);
+        $this->assertInstanceOf('\Osians\VeManager\Entity', $result[0]);
+    }
+}
+
+/* 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use \Wsantana\VeManager\QueryBuilderInterface;
-use \Wsantana\VeManager\QueryBuilder;
-use \Wsantana\VeManager\Database\Provider\Mysql;
-use \Wsantana\VeManager\EntityInterface;
-use \Wsantana\VeManager\Entity;
-use \Wsantana\VeManager\VirtualEntity;
-use \Wsantana\VeManager\VeManager;
+use \Osians\VeManager\QueryBuilderInterface;
+use \Osians\VeManager\QueryBuilder;
+use \Osians\VeManager\Database\Provider\Mysql;
+use \Osians\VeManager\EntityInterface;
+use \Osians\VeManager\Entity;
+use \Osians\VeManager\VirtualEntity;
+use \Osians\VeManager\VeManager;
 
 # Conexao...
 $driver = new Mysql();
@@ -77,5 +110,5 @@ echo $query;
 
 // @todo precisa adicionar uma nova tabela endereços e tentar realizar as relations
 
-
+*/
 

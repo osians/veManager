@@ -1,6 +1,6 @@
 <?php
 
-namespace Wsantana\VeManager;
+namespace Osians\VeManager;
 
 class Entity implements EntityInterface
 {
