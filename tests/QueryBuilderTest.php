@@ -4,6 +4,9 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use PHPUnit\Framework\TestCase;
 
+use Osians\VeManager\VeManager;
+use Osians\VeManager\QueryBuilder;
+
 class QueryBuilderTest extends TestCase
 {
     protected $_vem = null;
