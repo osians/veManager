@@ -178,18 +178,37 @@ class QueryBuilder implements QueryBuilderInterface
      * Registra os campos/colunas que serao retornados
      * da consulta SQL
      *
-     * @param array  $fields - campos a pesquisar
+     * @param array  $fields - campos a retornar, onde:
+     *               null: indica tudo
+     *               []  : indica nada
+     *               ['fieldname']: indica um campo a retornar
+     *
      * @param String $prefix - prefixo, antes do nome da coluna.
+     *
      * @param String $tablename - nome da tabela
      *
      * @return \QueryBuilder
      */
-    protected function _addFields($fields = array(), $prefix = null, $tablename = null)
+    protected function _addFields($fields = null, $prefix = null, $tablename = null)
     {
-        if (is_array($fields) == false || sizeof($fields) == 0) {
+        // array vazio: indica que nao quer retornar campos dessa tabela
+        if (is_array($fields) && empty($fields)) {
             return $this;
         }
 
+        // default: retorna todos os campos da tabela
+        if (null == $fields) {
+            $this->_fields[] = [
+                'value' => '*',
+                'prefix'=> $prefix,
+                'owner' => $tablename,
+                'alias' => null
+            ];
+
+            return $this;
+        }
+
+        // retorna campos especificados no array
         foreach ($fields as $key => $value) {
             $this->_fields[] = [
                 'value' => $value,
@@ -235,18 +254,20 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Tabela em que as alterações acontecerao
      *
-     * @param String | Array $table - Tablename
+     * @param String|Array $table - Tablename
+     * @param Array|null $fields - []: indica nenhum campo, 
+     *                             null: indica todos os campos por default
      *
      * @return \QueryBuilder
      */
-    public function from($table, $fields = array())
+    public function from($table, $fields = null)
     {
         $this->_from = $table;
 
         $prefix = is_array($table) ? array_keys($table)[0] : null;
         $tablename = is_array($table) ? array_shift($table) : $table;
-        $this->_addFields($fields, $prefix, $tablename);
 
+        $this->_addFields($fields, $prefix, $tablename);
         $this->_addUsedTables($tablename);
 
         return $this;
@@ -257,7 +278,7 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function into($table)
     {
-            return $this->from($table);
+        return $this->from($table);
     }
 
     /**
@@ -540,6 +561,15 @@ class QueryBuilder implements QueryBuilderInterface
         return str_replace(array("\n", "\t", "\r"), '', $sql);
     }
 
+    /**
+     * Return Raw SQL
+     *
+     * @return String
+     */
+    public function getSql()
+    {
+        return $this->sql();
+    }
 
     /**
      * Parse info about the main Table in the Query
@@ -610,7 +640,11 @@ class QueryBuilder implements QueryBuilderInterface
         return implode(' ', $statement);
     }
 
-
+    /**
+     * Realiza Parse das condicoes do Where
+     *
+     * @return string
+     */
     protected function _parseWhere()
     {
         if (empty($this->_where)) {
@@ -626,8 +660,7 @@ class QueryBuilder implements QueryBuilderInterface
                 continue;
             }
 
-            $stmt = $where[0];
-            array_shift($where);
+            $stmt = array_shift($where);
             foreach ($where as $replace) {
                 $replace = is_numeric($replace) ? $replace : "'{$replace}'";
                 $stmt = preg_replace('/\?/i', $replace, $stmt, 1);
@@ -638,7 +671,6 @@ class QueryBuilder implements QueryBuilderInterface
 
         return 'WHERE ' . implode(' AND ', $statement);
     }
-
 
     /**
      * Realiza Parse do array SET, normalmente

@@ -26,12 +26,93 @@ class QueryBuilderTest extends TestCase
         $this->_vem = new VeManager($connection);
     }
     
-    public function testUserQuery()
+    public function testEntityReturn()
     {
         $query = new QueryBuilder();
         $query->select()->from('user')->where('id_user = ?', 4);
         $result = $this->_vem->query($query);
         $this->assertInstanceOf('\Osians\VeManager\Entity', $result[0]);
+    }
+    
+    public function testSelectQuery()
+    {
+        $expectedResult = "SELECT `user`.`*` FROM `user` WHERE (user.active = 1) LIMIT 0, 1";
+
+        $qb = new QueryBuilder();
+        $qb->select()
+           ->from('user')
+           ->where('user.active = ?', 1)
+           ->limit(1);
+
+        $result = md5($qb->sql()) == md5($expectedResult);
+        $this->assertTrue($result);
+    }
+    
+    public function testSelectInnerQuery()
+    {
+        $expected = "SELECT `user`.`*`, `user_address`.`id_user_address` FROM `user` INNER JOIN `user_address` ON user_address.id_user = user.id_user WHERE (user.active = 1) LIMIT 0, 1";
+
+        $qb = new QueryBuilder();
+        $qb->select()
+           ->from('user')
+           ->innerJoin('user_address', 'user_address.id_user = user.id_user')
+           ->where('user.active = ?', 1)
+           ->limit(1);
+
+        $result = md5($qb->sql()) == md5($expected);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Create a query and return some values
+     *
+     * @return void
+     */
+    public function testSelectInnerQueryGetSomeValues()
+    {
+        $expected = "SELECT `user`.`name`, `user_address`.`id_user_address`, `user_address`.`id_user`, `user_address`.`id_address` FROM `user` INNER JOIN `user_address` ON user_address.id_user = user.id_user WHERE (user.active = 1) LIMIT 0, 1";
+
+        $qb = new QueryBuilder();
+        $qb->select()
+           ->from('user', ['name'])
+           ->innerJoin('user_address', 'user_address.id_user = user.id_user', ['id_user_address', 'id_user', 'id_address'])
+           ->where('user.active = ?', 1)
+           ->limit(1);
+
+        $result = md5($qb->sql()) == md5($expected);
+        $this->assertTrue($result);
+    }
+
+    public function testSelectComplexyQuery()
+    {
+        $expected = "SELECT `usuario`.`*`, `ua`.`id_user_address`, `endereco`.`address`, `endereco`.`number`, `endereco`.`postal_code`, `endereco`.`active`, `endereco`.`id_address`, `address_type`.`type`, `address_type`.`id_address_type` FROM `user` AS `usuario` INNER JOIN `user_address` AS `ua` ON ua.id_user = usuario.id_user INNER JOIN `address` AS `endereco` ON endereco.id_address = ua.id_address INNER JOIN `address_type` ON address_type.id_address_type = endereco.id_address_type WHERE (endereco.active = 1) AND (usuario.active = 1) AND ((usuario.id_user = 2 OR endereco.id_address = 4)) ORDER BY `usuario`.`date_registration` desc LIMIT 0, 10";
+
+        $qb = new QueryBuilder();
+        $qb->select()
+            ->from(['usuario' => 'user'])
+            ->innerJoin(
+                ['ua' => 'user_address'],
+                'ua.id_user = usuario.id_user',
+                []
+            )
+            ->innerJoin(
+                ['endereco' => 'address'],
+                'endereco.id_address = ua.id_address',
+                ['address', 'number', 'postal_code', 'active']
+            )
+            ->innerJoin(
+                'address_type',
+                'address_type.id_address_type = endereco.id_address_type',
+                ['type']
+            )
+            ->where('endereco.active = ?', 1)
+            ->where('usuario.active = 1')
+            ->where('(usuario.id_user = ? OR endereco.id_address = ?)', 2, 4)
+            ->order('usuario.date_registration desc')
+            ->limit(10);
+
+        $result = md5($qb->sql()) == md5($expected);
+        $this->assertTrue($result);
     }
 }
 
