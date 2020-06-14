@@ -97,12 +97,37 @@ class QueryBuilder implements QueryBuilderInterface
     protected $_usedTables = array();
 
     /**
+     * When TRUE, this force to return Joined Table Primary Key in  the Query
+     *
+     * @var bool
+     */
+    protected $_returnJoinPK = true;
+    
+    /**
      * Constructor
      */
     public function __construct()
     {
     }
 
+    /**
+     * Set if Joined Tables will be forced to return Primary Key
+     *
+     * @param bool $val
+     *
+     * @return $this
+     */
+    public function setReturnJoinPrimaryKey($val = true)
+    {
+        $this->_returnJoinPK = ($val === true);
+        return $this;
+    }
+        
+    public function getReturnJoinPrimaryKey()
+    {
+        return $this->_returnJoinPK;
+    }
+    
     /**
      * Init a Select Statement query
      *
@@ -299,10 +324,9 @@ class QueryBuilder implements QueryBuilderInterface
 
         $tablename = is_array($table) ? array_shift($table) : $table;
 
-        //    forca o retorna da chave primaria das tabelas
-        //    agregadas via JOIN
+        //    forca o retorna da chave primaria das tabelas agregadas via JOIN
         //    @todo - precisa testar com cuidado essa opcao de "*"
-        if (!in_array("id_{$tablename}", $fields) && !in_array('*', $fields)) {
+        if (!in_array("id_{$tablename}", $fields) && !in_array('*', $fields) && $this->getReturnJoinPrimaryKey() == true) {
             $fields[] = "id_{$tablename}";
         }
 

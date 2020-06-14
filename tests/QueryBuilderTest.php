@@ -114,6 +114,20 @@ class QueryBuilderTest extends TestCase
         $result = md5($qb->sql()) == md5($expected);
         $this->assertTrue($result);
     }
+
+    public function testDelete()
+    {
+        $expected = "DELETE FROM `user` WHERE (user.id_user = 10) ";
+        
+        $qb = new QueryBuilder();
+        $qb->delete()
+           ->from('user')
+           ->where('user.id_user = ?', 10);
+        
+        $result = md5($qb->sql()) == md5($expected);
+        $this->assertTrue($result);
+    }
+    
 }
 
 /* 
