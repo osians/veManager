@@ -40,7 +40,6 @@ class EntityTest extends TestCase
 //        $entity->setAge(54);
 //        $entity->setMail('john.doe@acmeinc.com');
 //        var_dump($entity);
-//        //var_dump(md5($entity));
 ////        die();
 //        $this->assertTrue(false);
 //    }

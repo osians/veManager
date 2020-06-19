@@ -2,7 +2,7 @@
 
 namespace Osians\VeManager;
 
-class Entity implements EntityInterface
+abstract class Entity implements EntityInterface
 {
     /**
      * Nome da tabela da Entidade.
@@ -14,7 +14,7 @@ class Entity implements EntityInterface
     protected $__tableName = null;
 
     /**
-     *    Construct
+     * Construct
      */
     public function __construct()
     {
@@ -100,6 +100,8 @@ class Entity implements EntityInterface
      * @param  Array $argumentos
      *
      * @return Entity
+     * 
+     * @throws Exception
      */
     public function __call($method, $argumentos)
     {
@@ -119,8 +121,7 @@ class Entity implements EntityInterface
         }
 
         throw new \Exception(
-            "O método '{$method}' não existe na classe '" . 
-            get_class($this) . "'."
+            "Method '{$method}' does not exist in the class '".get_class($this)."'."
         );
     }
 
@@ -148,6 +149,63 @@ class Entity implements EntityInterface
         return substr(strtolower($method), 0, 3) === 'set';
     }
 
+    /**
+     * Call Set Method
+     *
+     * @param type $property
+     * @param type $value
+     *
+     * @return $this
+     */
+    protected function _callSetMethod($property, $value)
+    {
+        $this->_checkIfPropertyExists($property);
+        $this->{$property} = $value;
+        return $this;
+    }
+    
+    /**
+     * Call Get Method
+     *
+     * @param string $property
+     * @param string $argumentos
+     *
+     * @return mixed
+     */
+    protected function _callGetMethod($property, $argumentos)
+    {
+        $this->_checkIfPropertyExists($property);
+        return $this->{$property};
+    }
+    
+    /**
+     * Verify if property exists in this class
+     *
+     * @param string $property
+     *
+     * @throws \Exception
+     */
+    protected function _checkIfPropertyExists($property)
+    {
+        if (property_exists($this, $property) == false) {
+            throw new \Exception(
+                "Property '{$property}' does not exist in class '".get_class($this)."'"
+            );
+        }
+    }
+    
+    /**
+     * Get Property Name from Method Name
+     *
+     * @param string $method
+     *
+     * @return string
+     */
+    protected function getPropertyFromMethodName($method)
+    {
+        return '_' . lcfirst(substr($method, 3));
+    }
+    
     /**
      * Set table Name
      *
