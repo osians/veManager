@@ -100,34 +100,64 @@ class VeManager
         return $this->getConnection()->prepare($query);
     }
 
+    /**
+     * Execute Query on Database
+     *
+     * @param \Osians\VeManager\QueryBuilderInterface $query
+     * @param bool $asArray - true return PDO StdClass Array
+     *
+     * @return Array of VirtualEntity
+     */
     public function query(QueryBuilderInterface $query, $asArray = false)
     {
         $resultSet = array();
         $stm = $this->_prepare($query);
         $stm->execute();
 
-        if ($stm->rowCount() > 0) {
-            $rows = $stm->fetchAll(\PDO::FETCH_OBJ);
+        if (!$stm->rowCount() > 0) {
+            return $resultSet;
+        }
 
-                // returns simple Array of StdClass
-                if ($asArray) {
-                        return $rows;
-                }
+        $rows = $stm->fetchAll(\PDO::FETCH_OBJ);
 
-                // returns  array of VirtualEntity
-            foreach ($rows as $row) {
-                $ve = new VirtualEntity();
-                $ve->init($row);
-                $ve->setQueryBuilder($query);
-                $ve->setTablename($query->getTableName());
-                $resultSet[] = $ve;
-            }
+        // returns simple Array of StdClass
+        if ($asArray) {
+            return $rows;
+        }
+
+            // returns  array of VirtualEntity
+        foreach ($rows as $row) {
+            $ve = new VirtualEntity();
+            $ve->init($row);
+            $ve->setQueryBuilder($query);
+            $ve->setTablename($query->getTableName());
+            $resultSet[] = $ve;
         }
 
         return $resultSet;
 
     }
 
+    /**
+     * Alias for Query Method
+     *
+     * @param \Osians\VeManager\QueryBuilderInterface $qb
+     * @param bool $asArray
+     *
+     * @return Array of VirtualEntity
+     */
+    public function fetch(QueryBuilderInterface $qb, $asArray = false)
+    {
+        return $this->query($qb, $asArray);
+    }
+    
+    /**
+     * Query database for only one record
+     *
+     * @param \Osians\VeManager\QueryBuilderInterface $query
+     *
+     * @return VirtualEntity
+     */
     public function fetchOne(QueryBuilderInterface $query)
     {
         $rs = $this->query($query);
@@ -137,11 +167,11 @@ class VeManager
     /**
      * Persist Data
      *  
-     * @param Entity $entity
+     * @param EntityInterface $entity
      *
      * @return integer|false - Last Insert ID or FALSE (case error)
      */
-    public function save(Entity $entity)
+    public function save(EntityInterface $entity)
     {
         if ($entity->getQueryBuilder() == null) {
             $entity->setQueryBuilder($this->getQueryBuilder());
@@ -158,11 +188,11 @@ class VeManager
     /**
      * Insert a new Record into table
      *
-     * @param  Entity $entity
+     * @param  EntityInterface $entity
      *
      * @return false | last_inserted_id
      */
-    protected function _saveNewRecord(Entity $entity)
+    protected function _saveNewRecord(EntityInterface $entity)
     {
         $values = array();
         foreach ($entity->getChangedProperty() as $column => $struct) {
@@ -186,11 +216,11 @@ class VeManager
     /**
      * Update a record into table database
      *
-     * @param  Entity $entity
+     * @param  EntityInterface $entity
      *
      * @return bool
      */
-    protected function _saveExistingRecord(Entity $entity)
+    protected function _saveExistingRecord(EntityInterface $entity)
     {
         $camposAlterados = $entity->getChangedProperty();
 
@@ -258,6 +288,13 @@ class VeManager
         return $ve;
     }
 
+    /**
+     * Returns DESC command from a Database Table
+     *
+     * @param string $tablename
+     *
+     * @return array
+     */
     private function _getDescFromTable($tablename)
     {
         $stm = $this->getConnection()->prepare("DESC `{$tablename}`");

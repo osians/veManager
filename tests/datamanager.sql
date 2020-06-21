@@ -36,16 +36,6 @@ CREATE TABLE `address` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `address`
---
-
-LOCK TABLES `address` WRITE;
-/*!40000 ALTER TABLE `address` DISABLE KEYS */;
-INSERT INTO `address` VALUES (1,1,'Av. Quentin Tarantino','701','11543002',1);
-/*!40000 ALTER TABLE `address` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `address_type`
 --
 
@@ -59,16 +49,6 @@ CREATE TABLE `address_type` (
   PRIMARY KEY (`id_address_type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `address_type`
---
-
-LOCK TABLES `address_type` WRITE;
-/*!40000 ALTER TABLE `address_type` DISABLE KEYS */;
-INSERT INTO `address_type` VALUES (1,'Home',1),(2,'Work',1),(3,'Family',1);
-/*!40000 ALTER TABLE `address_type` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `category`
@@ -88,15 +68,6 @@ CREATE TABLE `category` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `category`
---
-
-LOCK TABLES `category` WRITE;
-/*!40000 ALTER TABLE `category` DISABLE KEYS */;
-/*!40000 ALTER TABLE `category` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user`
 --
 
@@ -108,21 +79,11 @@ CREATE TABLE `user` (
   `name` varchar(128) NOT NULL,
   `email` varchar(128) NOT NULL,
   `age` smallint unsigned NOT NULL,
-  `date_registration` datetime NOT NULL,
+  `date_registration` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `active` tinyint unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_user`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (2,'William Shakespeare de Souza','shakespeare@outlook.com',56,'2020-02-10 12:13:14',1),(3,'John Doe','john.doe@outlook.com',173,'2020-02-10 14:59:01',1),(4,'W Santana','sans.pds@gmail.com',31,'2020-02-11 16:56:56',1);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user_address`
@@ -139,16 +100,6 @@ CREATE TABLE `user_address` (
   PRIMARY KEY (`id_user_address`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_address`
---
-
-LOCK TABLES `user_address` WRITE;
-/*!40000 ALTER TABLE `user_address` DISABLE KEYS */;
-INSERT INTO `user_address` VALUES (1,4,1,1);
-/*!40000 ALTER TABLE `user_address` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -159,4 +110,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-06-06 13:57:33
+-- Dump completed on 2020-06-21 12:10:02

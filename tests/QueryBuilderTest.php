@@ -22,7 +22,7 @@ class QueryBuilderTest extends TestCase
             ->setPassword('123456')
             ->setDatabaseName('datamanager');
         
-        $connection = $provider->conectar();
+        $connection = $provider->connect();
         $this->_vem = new VeManager($connection);
     }
     

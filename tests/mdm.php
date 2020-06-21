@@ -27,7 +27,7 @@ $drive
     ->setPassword('123456')
     ->setDatabaseName('datamanager');
 
-$pdo = $drive->conectar();
+$pdo = $drive->connect();
 
 $select = new QueryBuilder();
 

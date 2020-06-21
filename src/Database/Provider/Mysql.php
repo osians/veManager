@@ -47,7 +47,7 @@ class Mysql implements ProviderInterface
 
     public function getPort()
     {
-        return $this->_port;
+        return is_null($this->_port) ? 3306 : $this->_port;
     }
 
     public function setUsername($value)
@@ -114,7 +114,7 @@ class Mysql implements ProviderInterface
      * @see ProviderInterface::conectar()
      * @return \PDO
      */
-    public function conectar()
+    public function connect()
     {
         try {
             return new PDO(

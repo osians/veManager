@@ -22,7 +22,7 @@ class InstanceTest extends TestCase
             ->setPassword($this->_connection[3])
             ->setDatabaseName($this->_connection[4]);
         
-        $connection = $provider->conectar();
+        $connection = $provider->connect();
         
         $this->assertInstanceOf('\PDO', $connection);
     }
@@ -37,7 +37,7 @@ class InstanceTest extends TestCase
             ->setPassword($this->_connection[3])
             ->setDatabaseName($this->_connection[4]);
         
-        $connection = $provider->conectar();
+        $connection = $provider->connect();
         
         $this->assertInstanceOf('\PDO', $connection);
         

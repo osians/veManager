@@ -67,7 +67,7 @@ Some technologies are necessary for this system to work:
 
 **Database Provider** - it is responsible for allowing the system to talk to the database.
 
-**Query Builder** - This will allow a PHP class to be converted to an SQL language.
+**Query Builder** - This will allow a PHP class to be converted to an SQL language and SQL Language to be converted in Model Classes.
 
 **Abstract Model Entity** - this Class implements all the methods necessary for an Entity to be manipulated by other objects in the system.
 
@@ -100,7 +100,95 @@ The most important thing is that the primary key of the table is composed of "id
 
 ## **Get Start**
 
-**It will be done soon**
+The first thing we will always need is a database connection. We can achieve this through the Database Provider (ie.: Database/Mysql.php).
+
+### **Creating a Database Connection**
+```php
+$provider = new \Osians\VeManager\Database\Provider\Mysql();
+$provider
+    ->setHostname('localhost')
+    ->setPort('3306')
+    ->setUsername('my_database_username')
+    ->setPassword('my_database_password')
+    ->setDatabaseName('database_name');
+
+$connection = $provider->connect();
+```
+
+### **Set VeManager Connection**
+
+Once we have a database connection, we need to inform the VeManager of our connection.
+```php
+$vem = new Osians\VeManager\VeManager($connection);
+```
+
+### **Don't forget**
+
+Never forget that you need a properly standardized table in the database. In our example cases, we will use the user table.
+
+```
+user
+  `id_user` int unsigned NOT NULL AUTO_INCREMENT
+  `name` varchar(128) NOT NULL
+  `email` varchar(128) NOT NULL
+  `age` smallint unsigned NOT NULL
+  `date_registration` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `active` tinyint unsigned NOT NULL DEFAULT '1'
+  PRIMARY KEY (`id_user`)
+```
+
+**We are ready to begin**
+
+Once we have everything set up, we can start testing some VeManager class operating scenarios. So, let's go!
+
+### **Scenario 1**
+
+Creating a new entity and saving it to the database.
+
+```php
+// create a Virtual Entity
+$user = $vem->createEntity('user');
+
+// set data
+$user->setName('John Doe');
+$user->setEmail('john.doe@aol.com');
+$user->setAge(31);
+$user->setActive(1);
+
+// persist
+$vem->save($user);
+```
+
+
+### **Scenario 2**
+Load records from a database, change it and save.
+
+When it comes to the need of query database, a new element needs to be used ... the Query Builder. The `Query Builder` alone can only transform Object Oriented Programming into SQL Language. But when we use `VeManager` we can query the database through the `Database Provider` and transform the return of this query into `VirtualEntity` Classes that are manipulable via OOP.
+
+```php
+// create a Database Query
+$q = new QueryBuilder();
+$q->select()->from('user')->where("id_user = ?", 1);
+
+// use VeManager to exec the Query
+$user = $vem->fetchOne($q);
+
+// If you want to know if something was found in the database.
+if (empty($user)) {
+    throw new Exception('Record does not exist');
+}
+
+// change e-mail
+$user->setEmail('john.doe@outlook.com');
+
+// persist
+$vem->save($user);
+```
+
+### **Scenario 3**
+Delete a record from the database
+
+[!] **Comming soon**
 
 
 **Thanks**.

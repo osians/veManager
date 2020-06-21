@@ -28,7 +28,7 @@ class EntityTest extends TestCase
             ->setPassword($this->_connection[3])
             ->setDatabaseName($this->_connection[4]);
         
-        $connection = $provider->conectar();
+        $connection = $provider->connect();
 
         $this->vem = new VeManager($connection);
     }

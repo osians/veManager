@@ -27,7 +27,7 @@ $drive
     ->setDatabaseName('sooho658_apps');
 
 // get pdo
-$pdo = $drive->conectar();
+$pdo = $drive->connect();
 
 // create a query
 $select = new QueryBuilder();

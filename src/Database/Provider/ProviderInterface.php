@@ -10,5 +10,5 @@ interface ProviderInterface
      *
      * @return \PDO
      */
-    public function conectar();
+    public function connect();
 }
