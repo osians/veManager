@@ -50,12 +50,6 @@ class InstanceTest extends TestCase
         $select = new Osians\VeManager\QueryBuilder();
         $this->assertInstanceOf('\Osians\VeManager\QueryBuilder', $select);
     }
-    
-    public function testEntityCreate()
-    {
-        $entity = new Osians\VeManager\Entity();
-        $this->assertInstanceOf('\Osians\VeManager\Entity', $entity);        
-    }
 
     public function testVirtualEntityCreate()
     {

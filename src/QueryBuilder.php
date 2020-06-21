@@ -510,8 +510,7 @@ class QueryBuilder implements QueryBuilderInterface
 
 
     /**
-     * Tenta identificar a qual tabela pertence um campo
-     * determinado campo.
+     * Tenta identificar a qual tabela pertence um determinado campo.
      *
      * @param  String $field - nome do Campo/Coluna
      *

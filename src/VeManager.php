@@ -3,7 +3,7 @@
 namespace Osians\VeManager;
 
 use \Osians\VeManager\VirtualEntity;
-
+use \Osians\VeManager\QueryBuilder;
 
 /**
  * Virtual Entity Manager
@@ -21,6 +21,13 @@ class VeManager
     protected $_connection = null;
 
     /**
+     * Default QueryBulder
+     *
+     * @var \Osians\VeManager\QueryBuilder
+     */
+    protected $_queryBuilder = null;
+    
+    /**
      * Construct
      *
      * @param \PDO $conn
@@ -28,6 +35,7 @@ class VeManager
     public function __construct(\PDO $conn)
     {
         $this->setConnection($conn);
+        $this->initQueryBuilder();
     }
 
     /**
@@ -59,6 +67,27 @@ class VeManager
         return $this->_connection;
     }
 
+    /**
+     * Initialize Default Query Builder
+     *
+     * @return VeManager
+     */
+    public function initQueryBuilder()
+    {
+        $this->_queryBuilder = new QueryBuilder();
+        return $this;
+    }
+    
+    /**
+     * Get Default Query Builder
+     *
+     * @return QueryBuilder
+     */
+    public function getQueryBuilder()
+    {
+        return $this->_queryBuilder;
+    }
+    
     /**
      * Prepare an SQL Query
      *
@@ -108,12 +137,16 @@ class VeManager
     /**
      * Persist Data
      *  
-     * @param VirtualEntity $entity
+     * @param Entity $entity
      *
      * @return integer|false - Last Insert ID or FALSE (case error)
      */
-    public function save(VirtualEntity $entity)
+    public function save(Entity $entity)
     {
+        if ($entity->getQueryBuilder() == null) {
+            $entity->setQueryBuilder($this->getQueryBuilder());
+        }
+        
         if (null == $entity->getId()) {
             return $this->_saveNewRecord($entity);
         }
@@ -125,11 +158,11 @@ class VeManager
     /**
      * Insert a new Record into table
      *
-     * @param  VirtualEntity $entity
+     * @param  Entity $entity
      *
      * @return false | last_inserted_id
      */
-    protected function _saveNewRecord(VirtualEntity $entity)
+    protected function _saveNewRecord(Entity $entity)
     {
         $values = array();
         foreach ($entity->getChangedProperty() as $column => $struct) {
@@ -140,9 +173,9 @@ class VeManager
             return false;
         }
 
-        $query = new QueryBuilder();
-        $query->insert()->into($entity->getTableName())->values($values);
-        $stm = $this->getConnection()->prepare($query->sql());
+        $qb = $this->getQueryBuilder();
+        $qb->insert()->into($entity->getTableName())->values($values);
+        $stm = $this->getConnection()->prepare($qb->sql());
         $stm->execute();
 
         $entity->setId($this->getConnection()->lastInsertId());
@@ -153,16 +186,20 @@ class VeManager
     /**
      * Update a record into table database
      *
-     * @param  VirtualEntity $entity
+     * @param  Entity $entity
      *
      * @return bool
      */
-    protected function _saveExistingRecord(VirtualEntity $entity)
+    protected function _saveExistingRecord(Entity $entity)
     {
         $camposAlterados = $entity->getChangedProperty();
 
         $tables = $entity->getQueryBuilder()->getUsedTables();
 
+        if (empty($tables)) {
+            $tables[] = $entity->getTableName();
+        }
+        
         foreach ($tables as $table) {
 
             $sets = array();
@@ -178,16 +215,16 @@ class VeManager
                 continue;
             }
 
-            $query = new QueryBuilder();
-            $query->update($table);
+            $qb = $this->getQueryBuilder();
+            $qb->update($table);
 
             foreach ($sets as $key => $value) {
-                $query->set($key, $value);
+                $qb->set($key, $value);
             }
 
-            $query->where("{$struct['pk']} = ?", $struct['id']);
+            $qb->where("{$struct['pk']} = ?", $struct['id']);
 
-            $stm = $this->getConnection()->prepare($query->sql());
+            $stm = $this->getConnection()->prepare($qb->sql());
             $stm->execute();
         }
 
@@ -214,6 +251,9 @@ class VeManager
 
         $ve->init($obj);
         $ve->setTablename($tablename);
+        
+        // set Default Query Builder
+        $ve->setQueryBuilder($this->getQueryBuilder());
 
         return $ve;
     }

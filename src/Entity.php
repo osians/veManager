@@ -14,6 +14,20 @@ abstract class Entity implements EntityInterface
     protected $__tableName = null;
 
     /**
+     * Keeps Model Changed Fields
+     *
+     * @var array
+     */
+    protected $_changedFields = array();
+    
+    /**
+     * Guarda Query que deu origem a essa entidade
+     *
+     * @var QueryBuilderInterface
+     */
+    private $__query = null;
+    
+    /**
      * Construct
      */
     public function __construct()
@@ -159,6 +173,7 @@ abstract class Entity implements EntityInterface
      */
     protected function _callSetMethod($property, $value)
     {
+        $this->_setChangedProperty($property, $this->{$property}, $value);
         $this->_checkIfPropertyExists($property);
         $this->{$property} = $value;
         return $this;
@@ -271,6 +286,89 @@ abstract class Entity implements EntityInterface
         return $retorno;
     }
 
+    /**
+     * Quando uma propriedade do objeto e' alterada,
+     * guarda o nome da propriedade para facilitar
+     * obter os campos alterados na hora do persist.
+     *
+     * @param String $property - Model Class Property
+     * @param String $before - Value Before Change
+     * @param String $after - New Value
+     *
+     * @return \VirtualEntity
+     */
+    protected function _setChangedProperty($property, $before, $after)
+    {
+        if (isset($this->_changedFields[$property])) {
+            return $this;
+        }
+        
+        $key = $this->_camelCaseToSnakeCase(substr($property, 1, strlen($property)));
+        $owner = $this->_getOwner($key);
+
+        $ownerId = $this->_snakeCaseToCamelCase("id_{$owner}");
+        if (!property_exists($this, $ownerId)) {
+            $this->$ownerId = null;
+        }
+
+        $this->_changedFields[$key] = array(
+            'from' => $before,
+            'to' => $after,
+            'owner' => $owner,
+            'id' => $this->$ownerId,
+            'pk' => "id_{$owner}"
+        );
+       
+        return $this;
+    }
+    
+    /**
+     * Returns Array with changed Properties
+     *
+     * @return Array of Array - [from, to, owner, id, pk]
+     */
+    public function getChangedProperty()
+    {
+        return $this->_changedFields;
+    }
+
+    /**
+     * Get the name of the Table that owner this field
+     *
+     * @param string $field
+     *
+     * @return string
+     */
+    private function _getOwner($field)
+    {
+        return null !== $this->getQueryBuilder()
+            ? $this->getQueryBuilder()->getFieldOwner($field)
+            : $this->getTableName();
+    }
+    
+    /**
+     * keeps the QueryBuilder for later use
+     *
+     * @param  QueryBuilderInterface $query
+     *
+     * @return  \VirtualEntity
+     */
+    public function setQueryBuilder(QueryBuilderInterface $query)
+    {
+        $this->__query = $query;
+        return $this;
+    }
+
+    /**
+     * Returns QueryBuilder
+     *
+     * @return \QueryBuilderInterface
+     */
+    public function getQueryBuilder()
+    {
+        return $this->__query;
+    }
+    
     /**
      *    Caso clone, elimina o ID na classe resultante
      */
