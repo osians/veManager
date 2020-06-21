@@ -59,7 +59,9 @@ class VemTest extends TestCase
         // this will return one VirtualEntity Model
         $user = $this->vem->fetchOne($q);
         if (empty($user)) {
-            throw new Exception('Record does not exist');
+            // 'Record does not exist'
+            $this->assertTrue(true);
+            return;
         }
         
         // change something
@@ -69,6 +71,21 @@ class VemTest extends TestCase
         $this->vem->save($user);
         
         $this->assertTrue(!empty($user));
+    }
+    
+    public function testDeleteRecord()
+    {
+        // @todo - Criar o metodo $vem->loadEntity('user', 10);
+        $user = $this->vem->createEntity('user');
+        $user->setId(10);
+        $this->assertTrue($this->vem->delete($user));
+    }
+    
+    public function testGetEntity()
+    {
+        $user = $this->vem->getEntity('user', 11);
+        var_dump($user); die();
+        $this->assertInstanceOf('\Osians\VeManager\VirtualEntity', $user);
     }
     
 }

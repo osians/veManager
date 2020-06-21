@@ -135,7 +135,6 @@ class VeManager
         }
 
         return $resultSet;
-
     }
 
     /**
@@ -165,6 +164,51 @@ class VeManager
     }
 
     /**
+     * Returns Entity By its ID
+     *
+     * @param string $tablename
+     * @param integer $id
+     *
+     * @return VirtualEntity
+     */
+    public function getEntity($tablename, $id = 0)
+    {
+        $query = new QueryBuilder();
+        $query->select()->from($tablename)->where("id_{$tablename} = ?", $id)->limit(1);
+        return $this->fetchOne($query);
+    }
+    
+    /**
+     * Remove a Entity
+     *
+     * @param \Osians\VeManager\EntityInterface $entity
+     * 
+     * @return bool
+     */
+    public function delete(EntityInterface $entity)
+    {
+        if ($entity->getId() == null) {
+            return true;
+        }
+     
+        $query = new QueryBuilder();
+        $query->delete()
+              ->from($entity->getTableName())
+              ->where($entity->getPrimaryKeyName() . " = ?", $entity->getId());
+        
+        $stmt = $this->_prepare($query);
+        $stmt->execute();
+
+        if (!$stmt->rowCount()) {
+            return false;
+        }
+
+        $entity->setId(null);
+        
+        return true;
+    }
+                
+    /**
      * Persist Data
      *  
      * @param EntityInterface $entity
@@ -183,8 +227,7 @@ class VeManager
 
         return $this->_saveExistingRecord($entity);
     }
-
-
+    
     /**
      * Insert a new Record into table
      *

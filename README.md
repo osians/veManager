@@ -188,6 +188,35 @@ $vem->save($user);
 ### **Scenario 3**
 Delete a record from the database
 
+VeManager is the responsible for deleting a record from the database. To do this, you need to inform VeManager the model(entity) that will be deleted.
+
+If you know the ID of an Entity, you can instance the model in 3 ways.
+
+**load Entity**
+
+```php
+// first way
+$user = $vem->createEntity('user');
+$user->setId(10);
+
+// second way
+$q = new QueryBuilder();
+$q->select()->from('user')->where("id = ?", 10);
+$user = $vem->fetchOne($q);
+
+// third way
+$user = $vem->getEntity('user', 10);
+
+```
+
+**Delete entity**
+```php
+$vem->delete($user);
+```
+
+### **Scenario 4**
+Loading a record with a foreign key.
+
 [!] **Comming soon**
 
 
