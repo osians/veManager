@@ -43,7 +43,7 @@ But if you want to create a Virtual Entity, as this system suggests, you can do 
 ```php
 $vem = new Osians\VeManager\VeManager($connectionParams);
 
-$user = $vem->createEntity('user');
+$user = $vem->create('user');
 $user->setName('John Doe');
 $user->setEmail('john.doe@hotmail.com');
 $user->setAge(31);
@@ -147,7 +147,7 @@ Creating a new entity and saving it to the database.
 
 ```php
 // create a Virtual Entity
-$user = $vem->createEntity('user');
+$user = $vem->create('user');
 
 // set data
 $user->setName('John Doe');
@@ -185,6 +185,23 @@ $user->setEmail('john.doe@outlook.com');
 $vem->save($user);
 ```
 
+#### **Alternative**
+
+Alternatively, you can get an entity from the database without using QueryBuilder. Just like this:
+
+```php
+// Get User
+$user = $vem->get('user', 1);
+
+// change e-mail
+$user->setEmail('john.doe@outlook.com');
+
+// persist
+$vem->save($user);
+```
+
+Just see what is most convenient for you.
+
 ### **Scenario 3**
 Delete a record from the database
 
@@ -198,7 +215,7 @@ If you know the ID of an Entity, you can instance the model in 3 ways.
 // first way
 // Note that this way will not load data from Database
 // this will only create a empty Entity and set an existing ID
-$user = $vem->createEntity('user');
+$user = $vem->create('user');
 $user->setId(10);
 
 // second way
@@ -207,7 +224,7 @@ $q->select()->from('user')->where("id = ?", 10);
 $user = $vem->fetchOne($q);
 
 // third way
-$user = $vem->getEntity('user', 10);
+$user = $vem->get('user', 10);
 
 ```
 
@@ -234,7 +251,7 @@ The example above shows a connection table that is used to connect the `user` ta
 **Getting:** You can easily get the data from the linked tables.
 
 ```php
-$userAddress = $this->vem->getEntity('user_address', 1);
+$userAddress = $this->vem->get('user_address', 1);
 $userName = $ua->getUser()->getName();
 $address = $ua->getAddress()->getAddress();
 ```
@@ -243,18 +260,63 @@ $address = $ua->getAddress()->getAddress();
 
 ```php
 // first way
-$ua = $this->vem->getEntity('user_address', 1);
+$ua = $this->vem->get('user_address', 1);
 $ua->setIdUser(2);
 echo $ua->getUser()->getName();
 
 // second way
-$ua = $this->vem->getEntity('user_address', 1);
-$user = $this->vem->getEntity('user', 2);
+$ua = $this->vem->get('user_address', 1);
+$user = $this->vem->get('user', 2);
 $ua->setUser($user);
 echo $ua->getUser()->getName();
 ```
 
-[!] **Comming soon**
+### **Scenario 5**
+Loading data from another Entity that has no Relationship ID.
+Let's say that we have the following table scenario:
+
+```
+user
+ - id_user
+ - name
+ - email
+ - active
+
+ user_address
+ - id_user_address
+ - id_user
+ - id_address
+ - active
+```
+
+In this scenario you can see that the `user` table has no direct relation to the `user_address` table. In other words, in the user table there's no column called **id_user_address** that links one table to another. But, we know that this relation exists! `user_address` is a conection table, it means that it holds many to many id records from the tables user and address.
+
+So, how do we get a table that has no relationship? In the same way as before!
+
+```php
+$user = $vem->get('user', 4);
+$ua = $user->getUserAddress();
+```
+
+The Entity Manager will try to find a table called **user_address** and check if there is a column in the table called **id_user**. Once this exists, it will try to return all data from `user_address` table where the `id_user` column is the same as the id stored in the user entity.
+
+Because this is a many-to-many relationship, the Entity Manager will return an Array instead of an VirtualEntity instance. So you need to manage this before using it.
+
+```php
+$user = $vem->get('user', 4);
+$ua = $user->getUserAddress();
+
+$postalCode = $ua[0]->getAddress()->getPostalCode();
+```
+
+In other words, you can't use like this:
+
+```php
+// Bad
+$postalCode = $user->getUserAddress()->getAddress()->getPostalCode();
+```
+
+**[!] more content Comming soon**
 
 
 **Thanks**.

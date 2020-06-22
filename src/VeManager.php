@@ -167,13 +167,30 @@ class VeManager
      *
      * @return VirtualEntity
      */
-    public function getEntity($tablename, $id = 0)
+    public function get($tablename, $id = 0)
     {
         $query = new QueryBuilder();
         $query->select()->from($tablename)->where("id_{$tablename} = ?", $id)->limit(1);
         return $this->fetchOne($query);
     }
     
+    /**
+     * Returns Entity from Database By Table Column name
+     *
+     * @param string $tablename
+     * @param string $columnName
+     * @param mixed $value
+     *
+     * @return Array of VirtualEntity
+     */
+    public function getBy($tablename, $columnName, $value = null)
+    {
+        $query = new QueryBuilder();
+        $query->select()->from($tablename)->where("$columnName = ?", $value);
+        return $this->fetch($query);
+    }
+
+
     /**
      * Remove a Entity
      *
@@ -313,9 +330,9 @@ class VeManager
      *
      * @return VirtualEntity
      */
-    public function createEntity($tablename)
+    public function create($tablename)
     {
-        $desc = $this->_getDescFromTable($tablename);
+        $desc = $this->getTableDesc($tablename);
 
         $obj = new \StdClass;
         foreach (array_keys($desc) as $property) {
@@ -353,11 +370,15 @@ class VeManager
      *
      * @return array
      */
-    private function _getDescFromTable($tablename)
+    public function getTableDesc($tablename)
     {
-        $stm = $this->getConnection()->prepare("DESC `{$tablename}`");
-        $stm->execute();
-
+        try {
+            $stm = $this->getConnection()->prepare("DESC `{$tablename}`");
+            $stm->execute();
+        } catch (\Exception $e) {
+            return false;
+        }
+        
         $properties = null;
 
         if ($stm->rowCount() > 0) {
@@ -369,5 +390,18 @@ class VeManager
         }
 
         return $properties;
+    }
+    
+    /**
+     * Check if table exists in the Database
+     *
+     * @param string $tablename
+     *
+     * @return bool
+     */
+    public function tableExists($tablename)
+    {
+        $sh = $this->getConnection()->prepare("DESCRIBE `{$tablename}`");
+        return ($sh->execute()) ? true : false;
     }
 }

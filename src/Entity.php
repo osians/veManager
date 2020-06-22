@@ -204,6 +204,7 @@ abstract class Entity implements EntityInterface
      */
     protected function _callGetMethod($property)
     {
+        // is LazyLoad?
         if (property_exists($this, $property) == false) {
             $prop = $this->_snakeCaseToCamelCase("id_{$property}");
             if (property_exists($this, $prop) == true && $this->{$prop} instanceof EntityInterface) {
@@ -212,12 +213,22 @@ abstract class Entity implements EntityInterface
              
             if (property_exists($this, $prop) == true && is_numeric($this->{$prop})) {
                 $this->{$prop} = $this->getEntityManager()
-                     ->getEntity(ltrim($property, '_'), $this->{$prop});
+                     ->get(ltrim($property, '_'), $this->{$prop});
                 return $this->{$prop};
             }
         }
+
+        // is a reference to a table in which the model id resides
+        if (property_exists($this, $property) == false) {
+            $tabname = $this->_camelCaseToSnakeCase($property);
+            $tab = $this->getEntityManager()->getTableDesc($tabname);
+
+            if ($tab !== false && isset($tab[$this->getPrimaryKeyName()])) {
+                return $this->getEntityManager()->getBy(
+                        $tabname, $this->getPrimaryKeyName(), $this->getId());
+            }
+        }
         
-        // @todo - quando chamar uma property que nao existe analisar se nao é uma tabela de ligação SQL
         $this->_checkIfPropertyExists($property);
         return $this->{$property};
     }

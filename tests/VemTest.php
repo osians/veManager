@@ -36,7 +36,7 @@ class VemTest extends TestCase
     {
         $vem = $this->vem;
         
-        $user = $vem->createEntity('user');
+        $user = $vem->create('user');
         $user->setId(16); // comment this line to make a insert instead of a update
         $user->setName('Jhonatan Doe');
         $user->setEmail('jhonatan.doe@gmail.com');
@@ -75,7 +75,7 @@ class VemTest extends TestCase
     
     public function testDeleteRecord()
     {
-        $user = $this->vem->createEntity('user');
+        $user = $this->vem->create('user');
         $user->setId(10);
         //$this->assertTrue($this->vem->delete($user));
         $this->assertTrue(true);
@@ -83,7 +83,7 @@ class VemTest extends TestCase
     
     public function testGetEntity()
     {
-        $user = $this->vem->getEntity('user', 11);
+        $user = $this->vem->get('user', 11);
         $this->assertInstanceOf('\Osians\VeManager\VirtualEntity', $user);
     }
     
