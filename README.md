@@ -1,4 +1,4 @@
-# veManager
+# PHP veManager
 
 A simple but powerful PHP Virtual Entity Data Manager `(in progress)`.
 
@@ -196,6 +196,8 @@ If you know the ID of an Entity, you can instance the model in 3 ways.
 
 ```php
 // first way
+// Note that this way will not load data from Database
+// this will only create a empty Entity and set an existing ID
 $user = $vem->createEntity('user');
 $user->setId(10);
 
@@ -215,7 +217,42 @@ $vem->delete($user);
 ```
 
 ### **Scenario 4**
-Loading a record with a foreign key.
+
+Entities Relationship. Loading data from another Entity.
+Let's say that we have the following table scenario:
+
+```
+user_address
+ - id_user_address
+ - id_user
+ - id_address
+ - active
+```
+
+The example above shows a connection table that is used to connect the `user` table to the `address` table. In this case, `id_user` and `id_address` will be converted to Entities, since they represent the IDs of **user** and **address** tables respectively.
+
+**Getting:** You can easily get the data from the linked tables.
+
+```php
+$userAddress = $this->vem->getEntity('user_address', 1);
+$userName = $ua->getUser()->getName();
+$address = $ua->getAddress()->getAddress();
+```
+
+**Setting:** If you want to change the property of a model that represents a LazyLoad. You can do this in two ways:
+
+```php
+// first way
+$ua = $this->vem->getEntity('user_address', 1);
+$ua->setIdUser(2);
+echo $ua->getUser()->getName();
+
+// second way
+$ua = $this->vem->getEntity('user_address', 1);
+$user = $this->vem->getEntity('user', 2);
+$ua->setUser($user);
+echo $ua->getUser()->getName();
+```
 
 [!] **Comming soon**
 

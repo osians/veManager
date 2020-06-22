@@ -28,6 +28,13 @@ abstract class Entity implements EntityInterface
     private $__query = null;
     
     /**
+     * Entity Manager
+     *
+     * @var Osians\VeManager\VeManager
+     */
+    protected $__em = null;
+    
+    /**
      * Construct
      */
     public function __construct()
@@ -173,6 +180,14 @@ abstract class Entity implements EntityInterface
      */
     protected function _callSetMethod($property, $value)
     {
+        if (property_exists($this, $property) == false && $value instanceof EntityInterface) {
+            $prop = $this->_snakeCaseToCamelCase("id_{$property}");
+            if (property_exists($this, $prop) == true) {
+                $this->{$prop} = $value;
+                return $this;
+            }
+        }
+
         $this->_setChangedProperty($property, $this->{$property}, $value);
         $this->_checkIfPropertyExists($property);
         $this->{$property} = $value;
@@ -187,8 +202,22 @@ abstract class Entity implements EntityInterface
      *
      * @return mixed
      */
-    protected function _callGetMethod($property, $argumentos)
+    protected function _callGetMethod($property)
     {
+        if (property_exists($this, $property) == false) {
+            $prop = $this->_snakeCaseToCamelCase("id_{$property}");
+            if (property_exists($this, $prop) == true && $this->{$prop} instanceof EntityInterface) {
+                return $this->{$prop};
+            }
+             
+            if (property_exists($this, $prop) == true && is_numeric($this->{$prop})) {
+                $this->{$prop} = $this->getEntityManager()
+                     ->getEntity(ltrim($property, '_'), $this->{$prop});
+                return $this->{$prop};
+            }
+        }
+        
+        // @todo - quando chamar uma property que nao existe analisar se nao é uma tabela de ligação SQL
         $this->_checkIfPropertyExists($property);
         return $this->{$property};
     }
@@ -367,6 +396,29 @@ abstract class Entity implements EntityInterface
     public function getQueryBuilder()
     {
         return $this->__query;
+    }
+    
+    /**
+     * Set Entity Manager
+     *
+     * @param \Osians\VeManager\VeManager $em
+     *
+     * @return Entity
+     */
+    public function setEntityManager(VeManager $em)
+    {
+        $this->__em = $em;
+        return $this;
+    }
+    
+    /**
+     * Get Entity Manager
+     *
+     * @return \Osians\VeManager\VeManager
+     */
+    public function getEntityManager()
+    {
+        return $this->__em;
     }
     
     /**

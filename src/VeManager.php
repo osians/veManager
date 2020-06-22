@@ -125,13 +125,9 @@ class VeManager
             return $rows;
         }
 
-            // returns  array of VirtualEntity
+        // returns  array of VirtualEntity
         foreach ($rows as $row) {
-            $ve = new VirtualEntity();
-            $ve->init($row);
-            $ve->setQueryBuilder($query);
-            $ve->setTablename($query->getTableName());
-            $resultSet[] = $ve;
+            $resultSet[] = $this->_newEntityFromData($query->getTableName(), $row);
         }
 
         return $resultSet;
@@ -239,7 +235,9 @@ class VeManager
     {
         $values = array();
         foreach ($entity->getChangedProperty() as $column => $struct) {
-            $values[$column] = $struct['to'];
+            $values[$column] = ($struct['to'] instanceof EntityInterface)
+                ? $struct['to']->getId()
+                : $struct['to'];
         }
 
         if (empty($values)) {
@@ -248,6 +246,7 @@ class VeManager
 
         $qb = $this->getQueryBuilder();
         $qb->insert()->into($entity->getTableName())->values($values);
+
         $stm = $this->getConnection()->prepare($qb->sql());
         $stm->execute();
 
@@ -281,7 +280,9 @@ class VeManager
                 if ($struct['id'] == null || $table != $struct['owner']) {
                     continue;
                 }
-                $sets["{$column} = ?"] = $struct['to'];
+                $sets["{$column} = ?"] = ($struct['to'] instanceof EntityInterface)
+                    ? $struct['to']->getId()
+                    : $struct['to'];
             }
 
             if (empty($sets)) {
@@ -314,7 +315,6 @@ class VeManager
      */
     public function createEntity($tablename)
     {
-        $ve = new VirtualEntity();
         $desc = $this->_getDescFromTable($tablename);
 
         $obj = new \StdClass;
@@ -322,15 +322,30 @@ class VeManager
             $obj->$property = null;
         }
 
-        $ve->init($obj);
+        return $this->_newEntityFromData($tablename, $obj);
+    }
+
+    /**
+     * Construct a Instance of a Virtual Entity
+     *
+     * @param String $tablename
+     * @param \StdClass $data - data
+     *
+     * @return VirtualEntity
+     */
+    protected function _newEntityFromData($tablename, $data)
+    {
+        $ve = new VirtualEntity();
+        $ve->init($data);
         $ve->setTablename($tablename);
         
         // set Default Query Builder
         $ve->setQueryBuilder($this->getQueryBuilder());
-
+        $ve->setEntityManager($this);
+        
         return $ve;
     }
-
+    
     /**
      * Returns DESC command from a Database Table
      *

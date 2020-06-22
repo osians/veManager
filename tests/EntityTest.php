@@ -17,6 +17,11 @@ class User extends Osians\VeManager\Entity
 class EntityTest extends TestCase
 {
     private $_connection = ['localhost', '3306', 'wsantana', '123456', 'datamanager'];
+    
+    /**
+     * @var Osians\VeManager\VeManager 
+     */
+    protected $vem = null;
 
     public function setUp()
     {
@@ -39,7 +44,7 @@ class EntityTest extends TestCase
         $this->assertInstanceOf('\Osians\VeManager\Entity', $entity);
     }
     
-    public function testEntitySetData()
+    public function testPhysicalEntitySetData()
     {
         $user = new User();
         $user->setId(13);
@@ -52,6 +57,33 @@ class EntityTest extends TestCase
         $this->assertEquals('Diego da Silva', $user->getName());
 //        $this->assertTrue(is_integer(intval($user->getId())));
     }
+  
+      public function testGetEntityRelation()
+      {
+          $ua = $this->vem->getEntity('user_address', 1);
+          $this->assertEquals('W Santana', $ua->getUser()->getName());
+      }
+
+      public function testSetEntityRelationID()
+      {
+          $ua = $this->vem->getEntity('user_address', 1);
+          $ua->setIdUser(2);
+          $this->assertEquals('William Shakespeare de Souza', $ua->getUser()->getName());
+      }
+
+      public function testSetEntityRelationEntity()
+      {
+          $ua = $this->vem->getEntity('user_address', 1);
+          $user = $this->vem->getEntity('user', 2);
+          $ua->setUser($user);
+          $this->assertEquals('William Shakespeare de Souza', $ua->getUser()->getName());
+      }
+      
+//    public function testEntityRelation()
+//    {
+//        $user = $this->vem->getEntity('user', 11);
+//        $user->getUserAddress();
+//    }
     
     public function tearDown()
     {
