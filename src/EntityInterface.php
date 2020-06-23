@@ -31,17 +31,17 @@ interface EntityInterface
     public function init(\StdClass $object);
 
     /**
-     * Retorna o Nome da tabela a qual a Entidade se refere.
-     * Se não for setado na entidade filho, sera usado o nome da
-     * classe como nome da tabela por padrão.
+     * Returns the Name of the table to which the Entity refers.
+     * If it's not set in the child entity, the class name will be 
+     * used as the table name by default.
      *
      * @return String
      */
     public function getTableName();
 
     /**
-     * Retorna nome da coluna que guarda Chave Primaria da Entidade.
-     * Por padrao o nome e' composto de "id_ + nome_da_classe" em lowercase.
+     * Returns the name of the column that holds the Entity's Primary Key.
+     * By default the name is made up of "id_ + class_name" in lower case.
      *
      * @return String
      */

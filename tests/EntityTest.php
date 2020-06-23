@@ -61,7 +61,7 @@ class EntityTest extends TestCase
       public function testGetEntityRelation()
       {
           $ua = $this->vem->get('user_address', 1);
-          $this->assertEquals('W Santana', $ua->getUser()->getName());
+          $this->assertEquals('W Santana Nasc', $ua->getUser()->getName());
       }
 
       public function testSetEntityRelationID()
@@ -87,7 +87,7 @@ class EntityTest extends TestCase
         // Good
         $ua = $user->getUserAddress();
         $postalCode = $ua[0]->getAddress()->getPostalCode();
-        $this->assertEquals('11543002', $postalCode);
+        $this->assertEquals('99543002', $postalCode);
     }
     
     public function tearDown()

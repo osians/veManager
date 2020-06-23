@@ -387,7 +387,7 @@ class QueryBuilder implements QueryBuilderInterface
      * How to group the query
      * Ex: ->group('date');
      *
-     * @param  String $order
+     * @param  String $group
      *
      * @return QueryBuilder
      */
@@ -480,8 +480,7 @@ class QueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * Retorna um Array informando a qual tabela pertence
-     * cada campo da consulta
+     * Returns an Array informing which table each query field belongs to
      *
      * @return Array
      */

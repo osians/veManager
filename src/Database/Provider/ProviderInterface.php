@@ -5,8 +5,7 @@ namespace Osians\VeManager\Database\Provider;
 interface ProviderInterface
 {
     /**
-     * Realiza uma conexao com o Banco de dados
-     * e retorna um driver PDO
+     * Creates a database connection and returns a PDO driver
      *
      * @return \PDO
      */

@@ -10,6 +10,7 @@ use \Osians\VeManager\QueryBuilder;
  *
  * @author Wanderlei Santana <sans.pds@gmail.com>
  * @package VEM - Virtual Entity Manager
+ * @version 20200622220300
  */
 class VeManager
 {
@@ -19,13 +20,6 @@ class VeManager
      * @var \PDO
      */
     protected $_connection = null;
-
-    /**
-     * Default QueryBulder
-     *
-     * @var \Osians\VeManager\QueryBuilder
-     */
-    protected $_queryBuilder = null;
     
     /**
      * Construct
@@ -35,7 +29,6 @@ class VeManager
     public function __construct(\PDO $conn)
     {
         $this->setConnection($conn);
-        $this->initQueryBuilder();
     }
 
     /**
@@ -65,27 +58,6 @@ class VeManager
         }
 
         return $this->_connection;
-    }
-
-    /**
-     * Initialize Default Query Builder
-     *
-     * @return VeManager
-     */
-    public function initQueryBuilder()
-    {
-        $this->_queryBuilder = new QueryBuilder();
-        return $this;
-    }
-    
-    /**
-     * Get Default Query Builder
-     *
-     * @return QueryBuilder
-     */
-    public function getQueryBuilder()
-    {
-        return $this->_queryBuilder;
     }
     
     /**
@@ -127,7 +99,7 @@ class VeManager
 
         // returns  array of VirtualEntity
         foreach ($rows as $row) {
-            $resultSet[] = $this->_newEntityFromData($query->getTableName(), $row);
+            $resultSet[] = $this->_newEntityFromData($query, $row);
         }
 
         return $resultSet;
@@ -231,7 +203,7 @@ class VeManager
     public function save(EntityInterface $entity)
     {
         if ($entity->getQueryBuilder() == null) {
-            $entity->setQueryBuilder($this->getQueryBuilder());
+            $entity->setQueryBuilder(new QueryBuilder());
         }
         
         if (null == $entity->getId()) {
@@ -261,7 +233,7 @@ class VeManager
             return false;
         }
 
-        $qb = $this->getQueryBuilder();
+        $qb = new QueryBuilder();
         $qb->insert()->into($entity->getTableName())->values($values);
 
         $stm = $this->getConnection()->prepare($qb->sql());
@@ -288,7 +260,7 @@ class VeManager
         if (empty($tables)) {
             $tables[] = $entity->getTableName();
         }
-        
+
         foreach ($tables as $table) {
 
             $sets = array();
@@ -306,7 +278,7 @@ class VeManager
                 continue;
             }
 
-            $qb = $this->getQueryBuilder();
+            $qb = new QueryBuilder();
             $qb->update($table);
 
             foreach ($sets as $key => $value) {
@@ -339,25 +311,25 @@ class VeManager
             $obj->$property = null;
         }
 
-        return $this->_newEntityFromData($tablename, $obj);
+        $query = new QueryBuilder;
+        $query->from($tablename);
+        return $this->_newEntityFromData($query, $obj);
     }
 
     /**
      * Construct a Instance of a Virtual Entity
      *
-     * @param String $tablename
-     * @param \StdClass $data - data
+     * @param QueryBuilderInterface $query
+     * @param StdClass $data - data
      *
      * @return VirtualEntity
      */
-    protected function _newEntityFromData($tablename, $data)
+    protected function _newEntityFromData($query, $data)
     {
         $ve = new VirtualEntity();
         $ve->init($data);
-        $ve->setTablename($tablename);
-        
-        // set Default Query Builder
-        $ve->setQueryBuilder($this->getQueryBuilder());
+        $ve->setTablename($query->getTableName());
+        $ve->setQueryBuilder($query);
         $ve->setEntityManager($this);
         
         return $ve;

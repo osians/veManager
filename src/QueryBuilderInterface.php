@@ -5,8 +5,8 @@ namespace Osians\VeManager;
 interface QueryBuilderInterface
 {
     /**
-     * Deve retornar o nome da Tabela Principal
-     * em que a consulta esta ocorrendo.
+     * This needs to return the name of the Main Table in 
+     * which the query is taking place.
      *
      * @return String 
      */

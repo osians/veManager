@@ -26,6 +26,7 @@ class Mysql implements ProviderInterface
     public function __construct()
     {
         $this->_charset = 'utf8';
+        $this->_port = 3306;
     }
 
     public function setHostname($value) 
@@ -47,7 +48,7 @@ class Mysql implements ProviderInterface
 
     public function getPort()
     {
-        return is_null($this->_port) ? 3306 : $this->_port;
+        return $this->_port;
     }
 
     public function setUsername($value)
@@ -104,8 +105,8 @@ class Mysql implements ProviderInterface
     protected function _getOptions()
     {
         return array(
-            PDO::ATTR_PERSISTENT  => true,
-            PDO::ATTR_ERRMODE     => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$this->getCharset()}'"
         );
     }
@@ -123,12 +124,12 @@ class Mysql implements ProviderInterface
                 $this->getPassword(), 
                 $this->_getOptions()
             );
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->_throwException($e);
         }
     }
 
-    protected function _throwException(PDOException $e)
+    protected function _throwException(\PDOException $e)
     {
         $code = $e->getCode();
         $message = $e->getMessage();
@@ -136,17 +137,17 @@ class Mysql implements ProviderInterface
         switch ($code) {
             case 1049:
                 throw new Exception(
-                    "O Banco de dados {$this->getDatabaseName()} não existe.", $code);
+                    "The database '{$this->getDatabaseName()}' does not exist.", $code);
             break;
             
             case 2002:
                 throw new Exception(
-                    "Conexão com o servidor de banco de dados {$this->getHostname()} foi recusada.", $code);
+                    "Database connection with '{$this->getHostname()}' was refused.", $code);
             break;
 
             case 1045:
                 throw new Exception(
-                    "Falha ao tentar logar no servidor de banco de dados {$this->getHostname()} com o usuário {$this->getUsername()}. Talvez a senha ou o nome de usuário estejam incorretos.", $code);
+                    "Attempt to log into database '{$this->getHostname()}' with the username '{$this->getUsername()}' failed. The username or password may be incorrect.", $code);
             break;
 
             default:
