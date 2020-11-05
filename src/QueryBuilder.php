@@ -2,6 +2,8 @@
 
 namespace Osians\VeManager;
 
+use Exception;
+
 /**
  * Query Builder
  */
@@ -35,7 +37,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Nome da tabela principal em que a consulta ocorre
      *
-     * @var Array | String
+     * @var array | string
      */
     protected $_from = null;
 
@@ -61,7 +63,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Used for Update
      *
-     * @var Array
+     * @var array
      */
     protected $_set = array();
 
@@ -80,12 +82,12 @@ class QueryBuilder implements QueryBuilderInterface
     protected $_order = null;
 
     /**
-     * @var Interger
+     * @var integer
      */
     protected $_offset = null;
 
     /**
-     * @var Interger
+     * @var integer
      */
     protected $_count = 1000;
 
@@ -102,7 +104,12 @@ class QueryBuilder implements QueryBuilderInterface
      * @var bool
      */
     protected $_returnJoinPK = true;
-    
+
+    /**
+     * @var array
+     */
+    private $_values = array();
+
     /**
      * Constructor
      */
@@ -153,6 +160,8 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Init a Update Statement query
      *
+     * @param string $tableName
+     *
      * @return QueryBuilder
      */
     public function update($tableName)
@@ -189,7 +198,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Values used for insert statemant
      *
-     * @param  Array $values
+     * @param  array $values
      *
      * @return QueryBuilder
      */
@@ -212,7 +221,7 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @param String $tablename - nome da tabela
      *
-     * @return \QueryBuilder
+     * @return QueryBuilder
      */
     protected function _addFields($fields = null, $prefix = null, $tablename = null)
     {
@@ -279,11 +288,11 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Tabela em que as alterações acontecerao
      *
-     * @param String|Array $table - Tablename
-     * @param Array|null $fields - []: indica nenhum campo, 
+     * @param string|array $table - Tablename
+     * @param array|null $fields - []: indica nenhum campo,
      *                             null: indica todos os campos por default
      *
-     * @return \QueryBuilder
+     * @return QueryBuilder
      */
     public function from($table, $fields = null)
     {
@@ -300,6 +309,10 @@ class QueryBuilder implements QueryBuilderInterface
 
     /**
      * @alias para from
+     *
+     * @param string|array $table
+     *
+     * @return QueryBuilder
      */
     public function into($table)
     {
@@ -309,11 +322,11 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Adiciona um Inner Join a Consulta
      *
-     * @param  Array  $table
+     * @param  array  $table
      * @param  String $on
      * @param  array  $fields
      *
-     * @return \QueryBuilder
+     * @return QueryBuilder
      */
     public function innerJoin($table, $on, $fields = array())
     {
@@ -346,11 +359,11 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Add a Left Join to the Query
      *
-     * @param  String | Array $table
+     * @param  String | array $table
      * @param  String $on
-     * @param  Array $fields
+     * @param  array $fields
      *
-     * @return \QueryBuilder
+     * @return QueryBuilder
      */
     public function leftJoin($table, $on, $fields = array())
     {
@@ -482,15 +495,15 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Returns an Array informing which table each query field belongs to
      *
-     * @return Array
+     * @return array
      */
     public function getFieldMap()
     {
         $relation = $this->_getRelationAliasTableFromFields();
 
-        $sql = str_replace('`', '', $this->sql());
-        $sql = preg_replace('!\s+!', ' ', $sql);
-        $sql = str_replace(array("\n", "\t", "\r"), '', $sql);
+        // $sql = str_replace('`', '', $this->sql());
+        // $sql = preg_replace('!\s+!', ' ', $sql);
+        // $sql = str_replace(array("\n", "\t", "\r"), '', $sql);
 
         foreach($this->_fields as &$field)
         {
@@ -511,7 +524,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Tenta identificar a qual tabela pertence um determinado campo.
      *
-     * @param  String $field - nome do Campo/Coluna
+     * @param  String $column - nome do Campo/Coluna
      *
      * @return String - Nome da Tabela
      */
@@ -537,6 +550,7 @@ class QueryBuilder implements QueryBuilderInterface
      * Return Raw SQL
      *
      * @return String
+     * @throws Exception
      */
     public function sql()
     {
@@ -587,6 +601,7 @@ class QueryBuilder implements QueryBuilderInterface
      * Return Raw SQL
      *
      * @return String
+     * @throws Exception
      */
     public function getSql()
     {
@@ -597,18 +612,20 @@ class QueryBuilder implements QueryBuilderInterface
      * Parse info about the main Table in the Query
      *
      * @return String
+     * @throws Exception
      */
     protected function _parseFrom()
     {
         if (is_null($this->_from)) {
-            throw new \Exception("'FROM' property is missing");
+            throw new Exception("'FROM' property is missing");
         }
 
         if (is_array($this->_from)) {
             $alias = array_keys($this->_from);
             $table = array_values($this->_from);
 
-            $from = ($table[0] instanceof EntityQueryInterface)
+            //$from = ($table[0] instanceof EntityQueryInterface)
+            $from = ($table[0] instanceof QueryBuilderInterface)
                 ? "({$table[0]->sql()})" : "`{$table[0]}`";
 
             return "{$from} AS `{$alias[0]}`";
@@ -721,11 +738,14 @@ class QueryBuilder implements QueryBuilderInterface
         return "SET " . implode(', ', $statement);
     }
 
-
+    /**
+     * @return string
+     * @throws Exception
+     */
     protected function _parseInsertValues()
     {
         if (!is_array($this->_values) || empty($this->_values)) {
-            throw new \Exception("Insert values are missing", 1);
+            throw new Exception("Insert values are missing", 1);
         }
 
         $keys = "`" . implode("`, `", array_keys($this->_values)) . "`";
@@ -811,7 +831,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * return list of used tables in this query
      *
-     * @return Array
+     * @return array
      */
     public function getUsedTables()
     {
@@ -823,6 +843,7 @@ class QueryBuilder implements QueryBuilderInterface
      * compilada.
      *
      * @return String
+     * @throws Exception
      */
     public function __toString()
     {

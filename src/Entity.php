@@ -2,11 +2,14 @@
 
 namespace Osians\VeManager;
 
+use Exception;
+use StdClass;
+
 abstract class Entity implements EntityInterface
 {
     /**
      * Nome da tabela da Entidade.
-     * Mantenha null para usar o nome da
+     * Mantenha nha null para usar o nome da
      * classe como nome da Tabela
      *
      * @var String
@@ -30,10 +33,17 @@ abstract class Entity implements EntityInterface
     /**
      * Entity Manager
      *
-     * @var Osians\VeManager\VeManager
+     * @var VeManager
      */
     protected $__em = null;
-    
+
+    /**
+     * Entity Unique Identification
+     *
+     * @var integer
+     */
+    protected $_id = null;
+
     /**
      * Construct
      */
@@ -69,11 +79,11 @@ abstract class Entity implements EntityInterface
     /**
      * Initialize Entity
      *
-     * @param StdClass $object
+     * @param stdClass $object
      *
      * @return Entity
      */
-    public function init(\StdClass $object)
+    public function init(StdClass $object)
     {
         foreach (get_object_vars($object) as $key => $value) {
             $property = $this->_snakeCaseToCamelCase($key);
@@ -117,8 +127,8 @@ abstract class Entity implements EntityInterface
     /**
      * Call para metodos nao implementados da Entity
      *
-     * @param  String $method
-     * @param  Array $argumentos
+     * @param  string $method
+     * @param  array $argumentos
      *
      * @return Entity
      * 
@@ -136,12 +146,11 @@ abstract class Entity implements EntityInterface
 
         if ($this->_isValidGetMethod($method)) {
             return $this->_callGetMethod(
-                $this->getPropertyFromMethodName($method), 
-                $argumentos
+                $this->getPropertyFromMethodName($method)
             );
         }
 
-        throw new \Exception(
+        throw new Exception(
             "Method '{$method}' does not exist in the class '".get_class($this)."'."
         );
     }
@@ -173,10 +182,12 @@ abstract class Entity implements EntityInterface
     /**
      * Call Set Method
      *
-     * @param type $property
-     * @param type $value
+     * @param string $property
+     * @param mixed $value
      *
      * @return $this
+     *
+     * @throws Exception
      */
     protected function _callSetMethod($property, $value)
     {
@@ -193,19 +204,19 @@ abstract class Entity implements EntityInterface
         $this->{$property} = $value;
         return $this;
     }
-    
+
     /**
      * Call Get Method
      *
      * @param string $property
-     * @param string $argumentos
-     *
      * @return mixed
+     *
+     * @throws Exception
      */
     protected function _callGetMethod($property)
     {
         // is LazyLoad?
-        if (property_exists($this, $property) == false) {
+        if (property_exists($this, $property) === false) {
             $prop = $this->_snakeCaseToCamelCase("id_{$property}");
             if (property_exists($this, $prop) == true && $this->{$prop} instanceof EntityInterface) {
                 return $this->{$prop};
@@ -238,12 +249,12 @@ abstract class Entity implements EntityInterface
      *
      * @param string $property
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _checkIfPropertyExists($property)
     {
         if (property_exists($this, $property) == false) {
-            throw new \Exception(
+            throw new Exception(
                 "Property '{$property}' does not exist in class '".get_class($this)."'"
             );
         }
@@ -310,7 +321,7 @@ abstract class Entity implements EntityInterface
     /**
      * Retorna Propriedades do Objeto Cliente em formato de Array
      *
-     * @return Array
+     * @return array
      */
     public function toArray()
     {
@@ -335,7 +346,7 @@ abstract class Entity implements EntityInterface
      * @param String $before - Value Before Change
      * @param String $after - New Value
      *
-     * @return \VirtualEntity
+     * @return Entity
      */
     protected function _setChangedProperty($property, $before, $after)
     {
@@ -365,7 +376,7 @@ abstract class Entity implements EntityInterface
     /**
      * Returns Array with changed Properties
      *
-     * @return Array of Array - [from, to, owner, id, pk]
+     * @return array of Array - [from, to, owner, id, pk]
      */
     public function getChangedProperty()
     {
@@ -391,7 +402,7 @@ abstract class Entity implements EntityInterface
      *
      * @param  QueryBuilderInterface $query
      *
-     * @return  \VirtualEntity
+     * @return  Entity
      */
     public function setQueryBuilder(QueryBuilderInterface $query)
     {
@@ -402,7 +413,7 @@ abstract class Entity implements EntityInterface
     /**
      * Returns QueryBuilder
      *
-     * @return \QueryBuilderInterface
+     * @return QueryBuilderInterface
      */
     public function getQueryBuilder()
     {
@@ -412,7 +423,7 @@ abstract class Entity implements EntityInterface
     /**
      * Set Entity Manager
      *
-     * @param \Osians\VeManager\VeManager $em
+     * @param VeManager $em
      *
      * @return Entity
      */
@@ -425,7 +436,7 @@ abstract class Entity implements EntityInterface
     /**
      * Get Entity Manager
      *
-     * @return \Osians\VeManager\VeManager
+     * @return VeManager
      */
     public function getEntityManager()
     {

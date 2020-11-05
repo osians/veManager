@@ -2,6 +2,8 @@
 
 namespace Osians\VeManager;
 
+use stdClass;
+
 interface EntityInterface
 {
     /**
